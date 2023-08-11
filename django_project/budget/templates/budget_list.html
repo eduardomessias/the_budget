@@ -1,0 +1,28 @@
+<table class="table table-striped table-hover table-bordered table-sm">
+    <caption>List of budgets</caption>
+    <thead>
+        <tr>
+            <th scope="col">Purpose</th>
+            <th scope="col">Goal</th>
+            <th scope="col">From</th>
+            <th scope="col">To</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        {% if budgets %}
+        {% for budget in budgets %}
+        <tr>
+            <th scope="row"><a href="{% url 'budget_details' budget.uuid %}"
+                    class="text-decoration-none text-dark">{{budget.purpose}}</a></td>
+            <td>{{budget.goal}}</td>
+            <td>{{budget.from_date}}</td>
+            <td>{{budget.to_date}}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="4">No budget found</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>

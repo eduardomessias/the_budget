@@ -10,7 +10,7 @@
 {% endfor %}
 {% endif %}
 {% if user.is_authenticated %}
-<h1>Welcome, {{ user.first_name }}!</h1>
+{% include 'budget_list.html' %}
 {% else %}
 <div class="row">
     <div class="col-md-6">
