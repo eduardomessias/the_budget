@@ -2,6 +2,7 @@ import datetime
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 
 class CommonDataModel(models.Model):
@@ -26,7 +27,7 @@ class SoftDeletableModel(models.Model):
     def soft_delete(self, user_id=None):
         self.is_deleted = True
         self.deleted_by = user_id
-        self.deleted_at = datetime.timezone.now()
+        self.deleted_at = timezone.now()
         self.save()
 
 

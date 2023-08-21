@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+<table class="table table-striped table-hover table-bordered table-sm">
+    <caption>List of budget entries (Budget: {{ budget.purpose }})</caption>
+    <thead>
+        <tr>
+            <th scope="col">Source</th>
+            <th scope="col">Date</th>
+            <th scope="col">Amount</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        {% if entries %}
+        {% for entry in entries %}
+        <tr>
+            {% if entry.amount > 0 %}
+            <th scope="row"><a href="{% url 'income_details' budget.uuid entry.uuid %}"
+                    class="text-decoration-none text-dark">{{entry.source}}</a></td>
+                {% else %}
+            <th scope="row"><a href="{% url 'expense_details' budget.uuid entry.uuid %}"
+                    class="text-decoration-none text-dark">{{entry.source}}</a></td>
+                {% endif %}
+            <td>{{entry.date}}</td>
+            <td>{{entry.amount}}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="4">No entry found</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+<div class="d-flex gap-1">
+    <a href="{% url 'budget_details' budget.uuid %}">
+        <button class="btn btn-secondary">Back to budget details</button>
+    </a>
+    <a href="{% url 'register_income' budget.uuid %}">
+        <button class="btn btn-primary">Register income</button>
+    </a>
+    <a href="{% url 'register_expense' budget.uuid %}">
+        <button class="btn btn-primary">Register expense</button>
+    </a>
+</div>
+{% endblock content %}
