@@ -4,6 +4,7 @@
         <tr>
             <th scope="col">Purpose</th>
             <th scope="col">Goal</th>
+            <th scope="col">Balance</th>
             <th scope="col">From</th>
             <th scope="col">To</th>
         </tr>
@@ -15,6 +16,7 @@
             <th scope="row"><a href="{% url 'budget_details' budget.uuid %}"
                     class="text-decoration-none text-dark">{{budget.purpose}}</a></td>
             <td>{{budget.goal}}</td>
+            <td>{{budget.overall_balance}}</td>
             <td>{{budget.from_date}}</td>
             <td>{{budget.to_date}}</td>
         </tr>
