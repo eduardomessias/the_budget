@@ -55,15 +55,20 @@ def setup_budget(request, uuid=None):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid) if uuid else None
         form = BudgetForm(request.POST or None, instance=budget)
-        if form.is_valid():
-            if not budget:
-                budget = form.save(commit=False)
-                budget.user = request.user
-            budget = form.save()
-            messages.success(
-                request, f'Budget saved for {budget.purpose}!')
-            return redirect('home')
-        return render(request, 'setup_budget.html', {'form': form})
+        try:
+            if form.is_valid():
+                if not budget:
+                    budget = form.save(commit=False)
+                    budget.user = request.user
+                budget = form.save()
+                messages.success(
+                    request, f'Budget saved for {budget.purpose}!')
+                return redirect('home')
+            return render(request, 'setup_budget.html', {'form': form, 'budget': budget})
+        except ValueError as e:
+            messages.error(
+                request, f'Error saving budget: {e}', extra_tags='danger')
+            return render(request, 'setup_budget.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to set up a budget.', extra_tags='danger')
@@ -119,7 +124,7 @@ def register_income(request, uuid, income_uuid=None):
             messages.success(
                 request, f'Income saved for {income.source}!')
             return redirect('budget_entries', uuid=uuid)
-        return render(request, 'edit_budget_entry.html', {'form': form})
+        return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an income.', extra_tags='danger')
@@ -143,7 +148,7 @@ def register_expense(request, uuid, expense_uuid=None):
             messages.success(
                 request, f'Expense saved for {expense.source}!')
             return redirect('budget_entries', uuid=uuid)
-        return render(request, 'edit_budget_entry.html', {'form': form})
+        return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an expense.', extra_tags='danger')
