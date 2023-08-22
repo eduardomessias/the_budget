@@ -1,4 +1,4 @@
-from datetime import timezone
+from django.utils import timezone
 from uuid import uuid4
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
@@ -24,7 +24,9 @@ def home(request):
     else:
         budgets = Budget.objects.filter(
             is_deleted=False).order_by("-created_at")
-        return render(request, 'home.html', {'budgets': budgets})
+        active_budget = Budget.objects.filter(
+            is_deleted=False, from_date__lte=timezone.now(), to_date__gte=timezone.now()).first()
+        return render(request, 'home.html', {'budgets': budgets, 'active_budget': active_budget})
 
 
 def logout_user(request):

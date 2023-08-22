@@ -10,6 +10,10 @@
 {% endfor %}
 {% endif %}
 {% if user.is_authenticated %}
+{% if active_budget %}
+{% include 'active_budget.html' %}
+{% endif %}
+<br />
 {% include 'budget_list.html' %}
 {% else %}
 <div class="row">
