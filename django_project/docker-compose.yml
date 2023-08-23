@@ -1,20 +1,42 @@
-version: '3.9'
+version: '3'
+
 services:
-  web:
-    build: .
+  db:
+    container_name: postgresdb
+    image: postgres:latest
+    restart: always
+    env_file:
+      - project.env
     ports:
-      - 8000:8000
-    command: python manage.py runserver 0.0.0.0:8000
+      - 5432:5432
     volumes:
-      - .:/code
+      - postgres-data:/var/lib/postgresql/data
+
+  web:
+    container_name: django
+    build: .
+    command: gunicorn django_project.wsgi:application --bind 0.0.0.0:8000 --workers=4
+    env_file:
+      - project.env
+    expose:
+      - 8000
     depends_on:
       - db
-  db:
-    image: postgres:13.3
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
+      - staticfiles:/home/app/web/staticfiles
+
+  nginx:
+    container_name: nginx
+    image: nginx:mainline-alpine
+    restart: always
+    ports:
+      - 1337:80
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+      - staticfiles:/home/app/web/staticfiles
+    depends_on:
+      - web
 
 volumes:
-  postgres_data:
+  postgres-data:
+  staticfiles:
