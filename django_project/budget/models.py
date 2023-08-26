@@ -40,6 +40,13 @@ class Budget(CommonDataModel, SoftDeletableModel):
     def __str__(self):
         return self.purpose
 
+    def clean(self) -> None:
+        super().clean()
+        if self.from_date and self.to_date:
+            if self.__class__.objects.filter(models.Q(from_date__lte=self.to_date, to_date__gte=self.from_date) | models.Q(from_date__lte=self.to_date, to_date__gte=self.to_date) | models.Q(from_date__gte=self.from_date, to_date__lte=self.to_date)).exists():
+                raise ValueError(
+                    'Budgeting period overlaps with another budgeting period')
+
     class Meta:
         verbose_name_plural = 'Budgets'
 
