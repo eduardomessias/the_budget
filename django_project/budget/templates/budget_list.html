@@ -1,30 +1,45 @@
-<table class="table table-hover table-sm">
-    <caption>List of budgets</caption>
-    <thead>
-        <tr>
-            <th scope="col">Purpose</th>
-            <th scope="col">Goal</th>
-            <th scope="col">Balance</th>
-            <th scope="col">From</th>
-            <th scope="col">To</th>
-        </tr>
-    </thead>
-    <tbody class="table-group-divider">
-        {% if budgets %}
-        {% for budget in budgets %}
-        <tr>
-            <th scope="row"><a href="{% url 'budget_details' budget.uuid %}"
-                    class="text-decoration-none text-dark">{{budget.purpose}}</a></td>
-            <td>{{budget.goal}}</td>
-            <td>{{budget.overall_balance}}</td>
-            <td>{{budget.from_date}}</td>
-            <td>{{budget.to_date}}</td>
-        </tr>
-        {% endfor %}
-        {% else %}
-        <tr>
-            <td colspan="4">No budget found</td>
-        </tr>
-        {% endif %}
-    </tbody>
-</table>
+<div class="card">
+    <div class="card-header">
+        List of budgets
+    </div>
+    <div class="card-body no-more-tables">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Purpose</th>
+                    <th scope="col">Goal</th>
+                    <th scope="col">Balance</th>
+                    <th scope="col">From</th>
+                    <th scope="col">To</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% if budgets %}
+                {% for budget in budgets %}
+                <tr>
+                    <th scope="row" data-title="Purpose">
+                        <a href="{% url 'budget_details' budget.uuid %}"
+                            class="text-decoration-none text-dark">{{budget.purpose}}</a>
+                        {% if budget == active_budget %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-bookmark" viewBox="0 0 16 16">
+                            <path
+                                d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z" />
+                        </svg>
+                        {% endif %}
+                    </th>
+                    <td data-title="Goal">{{budget.goal}}</td>
+                    <td data-title="Balance">{{budget.overall_balance}}</td>
+                    <td data-title="From">{{budget.from_date}}</td>
+                    <td data-title="To">{{budget.to_date}}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="4">No budget found</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
