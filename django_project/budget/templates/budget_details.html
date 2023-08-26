@@ -16,6 +16,7 @@
     <div class="card-body">
         <p class="card-title">Budgeting period from {{budget.from_date}} to {{budget.to_date}}.</p>
         <p class="card-text">The goal of this budget is to reach {{budget.goal}} by the end of its period.</p>
+        <p class="card-text">The current balance is {{budget.overall_balance}}.</p>
         <div class="d-flex flex-wrap gap-1">
             <a href="{% url 'home' %}" class="btn btn-secondary">Back to the budget list</a>
             <a href="{% url 'budget_entries' budget.uuid %}" class="btn btn-primary">Check budget entries</a>
