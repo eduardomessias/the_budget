@@ -48,11 +48,11 @@ class Budget(CommonDataModel, SoftDeletableModel):
                     'Budgeting period overlaps with another budgeting period')
 
     def overall_balance(self):
-        total_income = Income.objects.filter(budget=self).aggregate(
+        total_income = Income.objects.filter(budget=self, is_deleted=False).aggregate(
             models.Sum('amount'))['amount__sum'] or 0
-        total_expense = Expense.objects.filter(budget=self).aggregate(
+        total_expense = Expense.objects.filter(budget=self, is_deleted=False).aggregate(
             models.Sum('amount'))['amount__sum'] or 0
-        return total_income - total_expense
+        return total_income + total_expense
 
     class Meta:
         verbose_name_plural = 'Budgets'
