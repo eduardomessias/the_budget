@@ -1,6 +1,14 @@
+import datetime
+from time import timezone
+from typing import Any, Dict, Mapping, Optional, Type, Union
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
+from django.core.files.base import File
+from django.db.models.base import Model
+from django.forms.utils import ErrorList
+
+from .models import Budget, Income, Expense
 
 
 class SignUpForm(UserCreationForm):
@@ -35,3 +43,63 @@ class SignUpForm(UserCreationForm):
         self.fields['password2'].widget.attrs['placeholder'] = 'Confirm password'
         self.fields['password2'].label = ''
         self.fields['password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
+
+
+class BudgetForm(forms.ModelForm):
+
+    class Meta:
+        model = Budget
+        fields = ('purpose', 'goal', 'from_date', 'to_date')
+
+    def __init__(self, *args, **kwargs):
+        super(BudgetForm, self).__init__(*args, **kwargs)
+        self.fields['purpose'].widget.attrs['class'] = 'form-control'
+        self.fields['purpose'].widget.attrs['placeholder'] = 'Purpose'
+        self.fields['purpose'].label = ''
+        self.fields['purpose'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid purpose.</small></span>'
+        self.fields['goal'].widget.attrs['class'] = 'form-control'
+        self.fields['goal'].widget.attrs['placeholder'] = 'Goal'
+        self.fields['goal'].label = ''
+        self.fields['goal'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid goal.</small></span>'
+        self.fields['from_date'] = forms.DateField(widget=forms.SelectDateWidget(
+            attrs={'class': 'form-control'}))
+        self.fields['from_date'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid from date.</small></span>'
+        self.fields['to_date'] = forms.DateField(widget=forms.SelectDateWidget(
+            attrs={'class': 'form-control'}))
+        self.fields['to_date'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid to date. It should be greater than the budget start date.</small></span>'
+
+
+class BudgetEntryForm(forms.ModelForm):
+
+    class Meta:
+        model = None
+        fields = ('source', 'amount', 'date')
+
+    def __init__(self, *args, **kwargs):
+        super(BudgetEntryForm, self).__init__(*args, **kwargs)
+        self.fields['source'].widget.attrs['class'] = 'form-control'
+        self.fields['source'].widget.attrs['placeholder'] = 'Source'
+        self.fields['source'].label = ''
+        self.fields['source'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid source.</small></span>'
+        self.fields['amount'].widget.attrs['class'] = 'form-control'
+        self.fields['amount'].widget.attrs['placeholder'] = 'Amount'
+        self.fields['amount'].label = ''
+        self.fields['amount'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid amount.</small></span>'
+        self.fields['date'] = forms.DateField(widget=forms.SelectDateWidget(
+            attrs={'class': 'form-control'}))
+        self.fields['date'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid date.</small></span>'
+        self.fields['date'].label = ''
+
+
+class IncomeForm(BudgetEntryForm):
+
+    class Meta:
+        model = Income
+        fields = ('source', 'amount', 'date')
+
+
+class ExpenseForm(BudgetEntryForm):
+
+    class Meta:
+        model = Expense
+        fields = ('source', 'amount', 'date')
