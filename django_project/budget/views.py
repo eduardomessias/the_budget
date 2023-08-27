@@ -115,18 +115,24 @@ def budget_entries(request, uuid):
 def register_income(request, uuid, income_uuid=None):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid)
-        income = Income.objects.get(uuid=income_uuid) if income_uuid else None
+        income = Income.objects.get(
+            uuid=income_uuid) if income_uuid else Income()
+        income.budget = budget
         form = IncomeForm(request.POST or None, instance=income)
-        if form.is_valid():
-            if not income:
-                income = form.save(commit=False)
-                income.user = request.user
-                income.budget = budget
-            income = form.save()
-            messages.success(
-                request, f'Income saved for {income.source}!')
-            return redirect('budget_entries', uuid=uuid)
-        return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+        try:
+            if form.is_valid():
+                if not income:
+                    income.user = request.user
+                    income = form.save(commit=False)
+                income = form.save()
+                messages.success(
+                    request, f'Income saved for {income.source}!')
+                return redirect('budget_entries', uuid=uuid)
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+        except ValueError as e:
+            messages.error(
+                request, f'Error saving income: {e}', extra_tags='danger')
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an income.', extra_tags='danger')
@@ -137,20 +143,25 @@ def register_expense(request, uuid, expense_uuid=None):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid)
         expense = Expense.objects.get(
-            uuid=expense_uuid) if expense_uuid else None
+            uuid=expense_uuid) if expense_uuid else Expense()
+        expense.budget = budget
         form = ExpenseForm(request.POST or None, instance=expense)
-        if form.is_valid():
-            if not expense:
-                expense = form.save(commit=False)
-                expense.user = request.user
-                expense.budget = budget
-                # make sure the amount is negative
-                expense.amount = -expense.amount if expense.amount > 0 else expense.amount
-            expense = form.save()
-            messages.success(
-                request, f'Expense saved for {expense.source}!')
-            return redirect('budget_entries', uuid=uuid)
-        return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+        try:
+            if form.is_valid():
+                if not expense:
+                    expense.user = request.user
+                    expense = form.save(commit=False)
+                    # make sure the amount is negative
+                    expense.amount = -expense.amount if expense.amount > 0 else expense.amount
+                expense = form.save()
+                messages.success(
+                    request, f'Expense saved for {expense.source}!')
+                return redirect('budget_entries', uuid=uuid)
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+        except ValueError as e:
+            messages.error(
+                request, f'Error saving expense: {e}', extra_tags='danger')
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an expense.', extra_tags='danger')

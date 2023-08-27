@@ -67,6 +67,13 @@ class Income(CommonDataModel, SoftDeletableModel):
     def __str__(self):
         return self.source
 
+    def clean(self) -> None:
+        super().clean()
+        if self.date and self.budget:
+            if self.date < self.budget.from_date or self.date > self.budget.to_date:
+                raise ValueError(
+                    F'Income date is not within the budgeting period (from {self.budget.from_date} to {self.budget.to_date})')
+
     class Meta:
         verbose_name_plural = 'Income'
 
@@ -79,6 +86,13 @@ class Expense(CommonDataModel, SoftDeletableModel):
 
     def __str__(self):
         return self.source
+
+    def clean(self) -> None:
+        super().clean()
+        if self.date and self.budget:
+            if self.date < self.budget.from_date or self.date > self.budget.to_date:
+                raise ValueError(
+                    F'Expense date is not within the budgeting period (from {self.budget.from_date} to {self.budget.to_date})')
 
     class Meta:
         verbose_name_plural = 'Expenses'
