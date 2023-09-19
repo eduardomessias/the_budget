@@ -29,4 +29,6 @@ urlpatterns = [
          views.income_details, name="income_details"),
     path("expense_details/<uuid:uuid>/<uuid:entry_uuid>/",
          views.expense_details, name="expense_details"),
+    path("load_recurrencies/<uuid:uuid>/",
+         name="load_recurrencies", view=views.load_recurrencies),
 ]

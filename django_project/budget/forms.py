@@ -8,7 +8,7 @@ from django.core.files.base import File
 from django.db.models.base import Model
 from django.forms.utils import ErrorList
 
-from .models import Budget, Income, Expense
+from .models import Budget, Income, Expense, RecurrencyType
 
 
 class SignUpForm(UserCreationForm):
@@ -70,10 +70,10 @@ class BudgetForm(forms.ModelForm):
 
 
 class BudgetEntryForm(forms.ModelForm):
-
     class Meta:
         model = None
-        fields = ('source', 'amount', 'date')
+        fields = ('source', 'amount', 'date',
+                  'recurrency', 'frequency')
 
     def __init__(self, *args, **kwargs):
         super(BudgetEntryForm, self).__init__(*args, **kwargs)
@@ -81,25 +81,39 @@ class BudgetEntryForm(forms.ModelForm):
         self.fields['source'].widget.attrs['placeholder'] = 'Source'
         self.fields['source'].label = ''
         self.fields['source'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid source.</small></span>'
+
         self.fields['amount'].widget.attrs['class'] = 'form-control'
         self.fields['amount'].widget.attrs['placeholder'] = 'Amount'
         self.fields['amount'].label = ''
         self.fields['amount'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid amount.</small></span>'
+
         self.fields['date'] = forms.DateField(widget=forms.SelectDateWidget(
             attrs={'class': 'form-control'}))
         self.fields['date'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid date.</small></span>'
-        self.fields['date'].label = ''
+        self.fields['date'].label = 'Date'
+
+        self.fields['recurrency'] = forms.ChoiceField(choices=RecurrencyType.choices, widget=forms.Select(
+            attrs={'class': 'form-control'}))
+        self.fields['recurrency'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid recurrency type.</small></span>'
+        self.fields['recurrency'].label = 'Recurrency'
+
+        self.fields['frequency'] = forms.IntegerField(widget=forms.NumberInput(
+            attrs={'class': 'form-control', 'placeholder': 'Frequency'}))
+        self.fields['frequency'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid frequency.</small></span>'
+        self.fields['frequency'].label = 'Frequency'
 
 
 class IncomeForm(BudgetEntryForm):
 
     class Meta:
         model = Income
-        fields = ('source', 'amount', 'date')
+        fields = ('source', 'amount', 'date',
+                  'recurrency', 'frequency')
 
 
 class ExpenseForm(BudgetEntryForm):
 
     class Meta:
         model = Expense
-        fields = ('source', 'amount', 'date')
+        fields = ('source', 'amount', 'date',
+                  'recurrency', 'frequency')

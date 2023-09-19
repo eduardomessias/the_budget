@@ -9,6 +9,7 @@
 </div>
 {% endfor %}
 {% endif %}
+<h4>Edit budget entry</h4>
 <form method="POST">
     {% csrf_token %}
     {{ form.as_p }}
