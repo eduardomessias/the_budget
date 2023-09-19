@@ -18,6 +18,30 @@
         <p class="card-title">It is part of the budget {{budget.purpose}}.</p>
         <p class="card-title">Budgeting period from {{budget.from_date}} to {{budget.to_date}}.</p>
         <p class="card-text">The goal of this budget is to reach {{budget.goal}} by the end of its period.</p>
+        {% if expense.parent %}
+        <p class="card-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-calendar-range" viewBox="0 0 16 16">
+                <path d="M9 7a1 1 0 0 1 1-1h5v2h-5a1 1 0 0 1-1-1zM1 9h4a1 1 0 0 1 0 2H1V9z" />
+                <path
+                    d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
+            </svg>
+            This expense is a recurrence instance of
+            <a
+                href="{% url 'expense_details' expense.parent.budget.uuid expense.parent.uuid %}">{{expense.parent.source}}.</a>
+        </p>
+        {% endif %}
+        {% if expense.is_recurrent %}
+        <p class="card-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
+                <path
+                    d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
+            </svg>
+            This expense is recurring {{expense.recurrency}} for a total of {{expense.frequency}} times.
+        </p>
+        {% endif %}
         <div class="d-flex flex-wrap gap-1">
             <a href="{% url 'budget_entries' budget.uuid %}">
                 <button class="btn btn-secondary">Back to budget entry list</button>

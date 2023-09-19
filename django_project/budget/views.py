@@ -3,9 +3,10 @@ from uuid import uuid4
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from dateutil import relativedelta
 
-from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm, BudgetEntryForm
-from .models import Budget, Income, Expense
+from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm
+from .models import Budget, Income, Expense, RecurrencyType
 
 
 def home(request):
@@ -63,6 +64,7 @@ def setup_budget(request, uuid=None):
                     budget = form.save(commit=False)
                     budget.user = request.user
                 budget = form.save()
+                budget.reload_recurrencies()
                 messages.success(
                     request, f'Budget saved for {budget.purpose}!')
                 return redirect('home')
@@ -115,18 +117,25 @@ def budget_entries(request, uuid):
 def register_income(request, uuid, income_uuid=None):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid)
-        income = Income.objects.get(uuid=income_uuid) if income_uuid else None
+        income = Income.objects.get(
+            uuid=income_uuid) if income_uuid else Income()
+        income.budget = budget
+        income.user = request.user
         form = IncomeForm(request.POST or None, instance=income)
-        if form.is_valid():
-            if not income:
-                income = form.save(commit=False)
-                income.user = request.user
-                income.budget = budget
-            income = form.save()
-            messages.success(
-                request, f'Income saved for {income.source}!')
-            return redirect('budget_entries', uuid=uuid)
-        return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+        try:
+            if form.is_valid():
+                if not income:
+                    income = form.save(commit=False)
+                income.is_recurrent = True if income.frequency > 1 else False
+                income = form.save()
+                income.create_recurrencies()
+                messages.success(request, f'Income saved for {income.source}!')
+                return redirect('budget_entries', uuid=uuid)
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+        except ValueError as e:
+            messages.error(
+                request, f'Error saving income: {e}', extra_tags='danger')
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an income.', extra_tags='danger')
@@ -137,20 +146,27 @@ def register_expense(request, uuid, expense_uuid=None):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid)
         expense = Expense.objects.get(
-            uuid=expense_uuid) if expense_uuid else None
+            uuid=expense_uuid) if expense_uuid else Expense()
+        expense.budget = budget
+        expense.user = request.user
         form = ExpenseForm(request.POST or None, instance=expense)
-        if form.is_valid():
-            if not expense:
-                expense = form.save(commit=False)
-                expense.user = request.user
-                expense.budget = budget
+        try:
+            if form.is_valid():
+                if not expense:
+                    expense = form.save(commit=False)
                 # make sure the amount is negative
-                expense.amount = -expense.amount if expense.amount > 0 else expense.amount
-            expense = form.save()
-            messages.success(
-                request, f'Expense saved for {expense.source}!')
-            return redirect('budget_entries', uuid=uuid)
-        return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+                expense.amount = -expense.amount if expense.amount >= 0 else expense.amount
+                expense.is_recurrent = True if expense.frequency > 1 else False
+                expense = form.save()
+                expense.create_recurrencies()
+                messages.success(
+                    request, f'Expense saved for {expense.source}!')
+                return redirect('budget_entries', uuid=uuid)
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+        except ValueError as e:
+            messages.error(
+                request, f'Error saving expense: {e}', extra_tags='danger')
+            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an expense.', extra_tags='danger')
@@ -185,6 +201,7 @@ def income_details(request, uuid, entry_uuid):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid)
         income = Income.objects.get(uuid=entry_uuid)
+        income.recurrency = RecurrencyType(income.recurrency).label
         return render(request, 'income_details.html', {'budget': budget, 'income': income})
     else:
         messages.error(
@@ -196,11 +213,46 @@ def expense_details(request, uuid, entry_uuid):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid)
         expense = Expense.objects.get(uuid=entry_uuid)
+        expense.recurrency = RecurrencyType(expense.recurrency).label
         return render(request, 'expense_details.html', {'budget': budget, 'expense': expense})
     else:
         messages.error(
             request, f'You must be logged in to view an expense.', extra_tags='danger')
         return redirect(request, 'home')
+
+
+def load_recurrencies(request, uuid):
+    if request.user.is_authenticated:
+        try:
+            budget = Budget.objects.get(uuid=uuid)
+            load_expense_recurrencies(request, budget)
+            load_income_recurrencies(request, budget)
+            messages.info(request, f'Recurrencies loaded!')
+            return redirect('budget_entries', uuid=uuid)
+        except ValueError as e:
+            messages.error(
+                request, f'Error loading recurrencies: {e}', extra_tags='danger')
+            return redirect('budget_entries', uuid=uuid)
+    else:
+        messages.error(
+            request, f'You must be logged load recurrencies into this budget.', extra_tags='danger')
+        return redirect(request, 'home')
+
+
+def load_income_recurrencies(request, budget):
+    incomes = Income.objects.filter(is_recurrent=True, is_deleted=False)
+    for income in incomes:
+        income_last_recurrency_date = income.last_recurrency_date()
+        if income_last_recurrency_date >= budget.from_date:
+            income.create_recurrencies()
+
+
+def load_expense_recurrencies(request, budget):
+    expenses = Expense.objects.filter(is_recurrent=True, is_deleted=False)
+    for expense in expenses:
+        expense_last_recurrency_date = expense.last_recurrency_date()
+        if expense_last_recurrency_date >= budget.from_date:
+            expense.create_recurrencies()
 
 
 def credits(request):
