@@ -147,9 +147,9 @@ class Income(CommonDataModel, SoftDeletableModel):
             is_deleted=True, deleted_by=self.user)
         if self.is_recurrent:
             date = self.date
-            for i in range(2, self.frequency):
+            for i in range(1, self.frequency):
                 date = self.next_recurrency_date(date)
-                self.create_recurrency(date, i)
+                self.create_recurrency(date)
 
     class Meta:
         verbose_name_plural = 'Income'
@@ -224,9 +224,9 @@ class Expense(CommonDataModel, SoftDeletableModel):
             is_deleted=True, deleted_by=self.user)
         if self.is_recurrent:
             date = self.date
-            for i in range(2, self.frequency):
+            for i in range(1, self.frequency):
                 date = self.next_recurrency_date(date)
-                self.create_recurrency(date, i)
+                self.create_recurrency(date)
 
     class Meta:
         verbose_name_plural = 'Expenses'

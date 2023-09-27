@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from dateutil import relativedelta
+import plotly.express as px
 
 from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm
 from .models import Budget, Income, Expense, RecurrencyType
@@ -27,7 +28,21 @@ def home(request):
             is_deleted=False).order_by("-created_at")
         active_budget = Budget.objects.filter(
             is_deleted=False, from_date__lte=timezone.now(), to_date__gte=timezone.now()).first()
-        return render(request, 'home.html', {'budgets': budgets, 'active_budget': active_budget})
+        data = dict(
+            character=["Eve", "Cain", "Seth", "Enos",
+                       "Noam", "Abel", "Awan", "Enoch", "Azura"],
+            parent=["", "Eve", "Eve", "Seth",
+                    "Seth", "Eve", "Eve", "Awan", "Eve"],
+            value=[10, 14, 12, 10, 2, 6, 6, 4, 4])
+
+        fig = px.sunburst(
+            data,
+            names='character',
+            parents='parent',
+            values='value',
+        )
+        sunburst_chart = fig.to_html(full_html=False, include_plotlyjs=False)
+        return render(request, 'home.html', {'budgets': budgets, 'active_budget': active_budget, 'sunburst_chart': sunburst_chart})
 
 
 def logout_user(request):

@@ -1,0 +1,13 @@
+<div class="card">
+    <div class="card-header">
+        Active budget: {{active_budget.purpose}}
+    </div>
+    <div class="card-body">
+        {% autoescape off %}
+        {{sunburst_chart}}
+        {% endautoescape %}
+    </div>
+    <div class="card-footer text-body-secondary">
+        <p>Created on {{active_budget.created_at}}</p>
+    </div>
+</div>

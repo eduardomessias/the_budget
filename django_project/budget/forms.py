@@ -101,6 +101,7 @@ class BudgetEntryForm(forms.ModelForm):
             attrs={'class': 'form-control', 'placeholder': 'Frequency'}))
         self.fields['frequency'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid frequency.</small></span>'
         self.fields['frequency'].label = 'Frequency'
+        self.fields['frequency'].widget.attrs['min'] = 1
 
 
 class IncomeForm(BudgetEntryForm):
