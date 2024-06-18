@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from dateutil import relativedelta
 import plotly.express as px
+from django.db.models import Sum
 
 from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm
 from .models import Budget, Income, Expense, RecurrencyType
@@ -28,21 +29,82 @@ def home(request):
             is_deleted=False).order_by("-created_at")
         active_budget = Budget.objects.filter(
             is_deleted=False, from_date__lte=timezone.now(), to_date__gte=timezone.now()).first()
-        data = dict(
-            character=["Eve", "Cain", "Seth", "Enos",
-                       "Noam", "Abel", "Awan", "Enoch", "Azura"],
-            parent=["", "Eve", "Eve", "Seth",
-                    "Seth", "Eve", "Eve", "Awan", "Eve"],
-            value=[10, 14, 12, 10, 2, 6, 6, 4, 4])
+        if active_budget:
+            sunburst_chart = active_budget_sunburst_chart(active_budget)
+            pie_chart = active_budget_pie_chart()
+            return render(request, 'home.html', {'budgets': budgets, 'active_budget': active_budget, 'sunburst_chart': sunburst_chart, 'pie_chart': pie_chart})
+        else:
+            return render(request, 'home.html', {'budgets': budgets, 'active_budget': active_budget})
 
-        fig = px.sunburst(
-            data,
-            names='character',
-            parents='parent',
-            values='value',
-        )
-        sunburst_chart = fig.to_html(full_html=False, include_plotlyjs=False)
-        return render(request, 'home.html', {'budgets': budgets, 'active_budget': active_budget, 'sunburst_chart': sunburst_chart})
+
+def active_budget_sunburst_chart(active_budget):
+    # get all income sources
+    income_sources = Income.objects.filter(
+        budget=active_budget, is_deleted=False).values_list('source', flat=True)
+    # get all expense sources
+    expense_sources = Expense.objects.filter(
+        budget=active_budget, is_deleted=False).values_list('source', flat=True)
+    # get all income amounts
+    income_amounts = Income.objects.filter(
+        budget=active_budget, is_deleted=False).values_list('amount', flat=True)
+    # get all expense amounts
+    expense_amounts = Expense.objects.filter(
+        budget=active_budget, is_deleted=False).values_list('amount', flat=True)
+    # get all expense absolute amounts
+    expense_amounts = [abs(x) for x in expense_amounts]
+    # characters list is composed of a label 'Income', 'Expenses' and all the income and expense sources
+    character = ["Income", "Expenses"] + \
+        list(income_sources) + list(expense_sources)
+    # truncate the income and expense sources to 10 characters
+    # character = [x[:10] for x in character]
+    # parent list is composed of a label '', '' and 'Income' for all the income sources and 'Expenses' for all the expense sources
+    parent = ["", ""] + ["Income" if x in income_sources else "Expenses" for x in list(
+        income_sources) + list(expense_sources)]
+    # value list is composed of the total income, total expense and all the income and expense amounts
+    value = [sum(income_amounts), sum(expense_amounts)] + \
+        list(income_amounts) + list(expense_amounts)
+
+    data = dict(
+        character=character,
+        parent=parent,
+        value=value
+    )
+
+    fig = px.sunburst(
+        data,
+        names='character',
+        parents='parent',
+        values='value',
+    )
+
+    fig.update_layout(
+        margin=dict(l=0, t=0, r=0, b=0),
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#f8f9fa",
+        font=dict(
+            size=11,
+            color="#7f7f7f"
+        ),
+        # name when downloading
+        title="Budget Sunburst Chart",
+    )
+    sunburst_chart = fig.to_html(
+        full_html=False, include_plotlyjs=False)
+
+    return sunburst_chart
+
+
+def active_budget_pie_chart():
+    df = px.data.tips()
+    fig = px.pie(df, values='tip', names='day', color='day',
+                 color_discrete_map={'Thur': 'lightcyan',
+                                     'Fri': 'cyan',
+                                     'Sat': 'royalblue',
+                                     'Sun': 'darkblue'})
+    pie_chart = fig.to_html(
+        full_html=False, include_plotlyjs=False)
+
+    return pie_chart
 
 
 def logout_user(request):

@@ -3,9 +3,16 @@
         Active budget: {{active_budget.purpose}}
     </div>
     <div class="card-body">
-        {% autoescape off %}
-        {{sunburst_chart}}
-        {% endautoescape %}
+        <div class="col-9">
+            {% autoescape off %}
+            {{sunburst_chart}}
+            {% endautoescape %}
+        </div>
+        <div class"col-3">
+            {% autoescape off %}
+            {{pie_chart}}
+            {% endautoescape %}
+        </div>
     </div>
     <div class="card-footer text-body-secondary">
         <p>Created on {{active_budget.created_at}}</p>
