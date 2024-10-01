@@ -122,12 +122,12 @@ class Income(CommonDataModel, SoftDeletableModel):
             return date + relativedelta.relativedelta(years=1)
         return date
 
-    def create_recurrency(self, date):
+    def create_recurrency(self, date, ocurrence, series):
         child = Income()
         child.budget = self.budget
         child.user = self.user
         child.parent = self
-        child.source = self.source
+        child.source = f'{self.source} ({ocurrence} of {series})'
         child.amount = self.amount
         child.is_recurrent = False
         child.frequency = 1
@@ -147,9 +147,9 @@ class Income(CommonDataModel, SoftDeletableModel):
             is_deleted=True, deleted_by=self.user)
         if self.is_recurrent:
             date = self.date
-            for i in range(2, self.frequency):
+            for i in range(2, self.frequency + 1):
                 date = self.next_recurrency_date(date)
-                self.create_recurrency(date, i)
+                self.create_recurrency(date, i, self.frequency)
 
     class Meta:
         verbose_name_plural = 'Income'
@@ -199,12 +199,12 @@ class Expense(CommonDataModel, SoftDeletableModel):
             return date + relativedelta.relativedelta(years=1)
         return date
 
-    def create_recurrency(self, date):
+    def create_recurrency(self, date, ocurrence, series):
         child = Expense()
         child.budget = self.budget
         child.user = self.user
         child.parent = self
-        child.source = self.source
+        child.source = f'{self.source} ({ocurrence} of {series})'
         child.amount = self.amount
         child.is_recurrent = False
         child.frequency = 1
@@ -220,13 +220,16 @@ class Expense(CommonDataModel, SoftDeletableModel):
                 child.save()
 
     def create_recurrencies(self):
+        # Excluindo a despesa atual
         Expense.objects.filter(parent=self).update(
             is_deleted=True, deleted_by=self.user)
+
+        # Verifica se é recorrente
         if self.is_recurrent:
             date = self.date
-            for i in range(2, self.frequency):
+            for i in range(2, self.frequency + 1):
                 date = self.next_recurrency_date(date)
-                self.create_recurrency(date, i)
+                self.create_recurrency(date, i, self.frequency)
 
     class Meta:
         verbose_name_plural = 'Expenses'
