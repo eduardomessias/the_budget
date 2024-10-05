@@ -233,3 +233,9 @@ class Expense(CommonDataModel, SoftDeletableModel):
 
     class Meta:
         verbose_name_plural = 'Expenses'
+
+class Category(CommonDataModel, SoftDeletableModel):    
+    name = models.CharField(max_length=30, default=None)
+
+    class Meta:
+        verbose_name_plural = 'Categories'

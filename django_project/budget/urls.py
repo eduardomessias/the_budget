@@ -31,4 +31,8 @@ urlpatterns = [
          views.expense_details, name="expense_details"),
     path("load_recurrencies/<uuid:uuid>/",
          name="load_recurrencies", view=views.load_recurrencies),
+     
+     path("user_settings/", view=views.user_settings, name="user_settings"),
+     path("categories/", view=views.categories, name="categories"),
+     path("add_category/", view=views.add_category, name="add_category"),
 ]

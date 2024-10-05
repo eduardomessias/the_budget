@@ -5,8 +5,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from dateutil import relativedelta
 
-from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm
-from .models import Budget, Income, Expense, RecurrencyType
+from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm, CategoryForm
+from .models import Budget, Income, Expense, RecurrencyType, Category
 
 
 def home(request):
@@ -257,3 +257,43 @@ def load_expense_recurrencies(request, budget):
 
 def credits(request):
     return render(request, 'credits.html')
+
+def user_settings(request):
+    if request.user.is_authenticated:                        
+        return render(request, 'user_settings.html')
+    else:
+        messages.error(
+            request, f'You must be logged in to view the settings.', extra_tags='danger')
+        return redirect(request, 'home')
+
+def categories(request):
+    if request.user.is_authenticated: 
+        categories = Category.objects.all()                   
+        return render(request, 'categories.html', {'categories': categories})
+    else:
+        messages.error(
+            request, f'You must be logged in to edit categories.', extra_tags='danger')
+        return redirect(request, 'home')
+   
+def add_category(request):
+    if request.user.is_authenticated:        
+        category = Category()  
+        category.user = request.user
+        form = CategoryForm(request.POST or None, instance=category)
+        try:
+            if form.is_valid():
+                if not category:
+                    category = form.save(commit=False)                
+                category = form.save()                
+                messages.success(request, f'Category added {category.name}!')
+                return redirect('categories')
+            return render(request, 'edit_category.html', {'form': form})
+        except ValueError as e:
+            messages.error(
+                request, f'Error saving category: {e}', extra_tags='danger')
+            return render(request, 'edit_category.html', {'form': form})
+    else:
+        messages.error(
+            request, f'You must be logged in to add a category.', extra_tags='danger')
+        return redirect(request, 'home')
+    

@@ -8,7 +8,7 @@ from django.core.files.base import File
 from django.db.models.base import Model
 from django.forms.utils import ErrorList
 
-from .models import Budget, Income, Expense, RecurrencyType
+from .models import Budget, Income, Expense, RecurrencyType, Category
 
 
 class SignUpForm(UserCreationForm):
@@ -117,3 +117,16 @@ class ExpenseForm(BudgetEntryForm):
         model = Expense
         fields = ('source', 'amount', 'date',
                   'recurrency', 'frequency')
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ('name',)
+
+    def __init__(self, *args, **kwargs):
+        super(CategoryForm, self).__init__(*args, **kwargs)
+        self.fields['name'].widget.attrs['class'] = 'form-control'
+        self.fields['name'].widget.attrs['placeholder'] = 'Name'
+        self.fields['name'].label = 'Category name'
+        self.fields['name'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid source.</small></span>'        
+
