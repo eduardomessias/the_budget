@@ -1,0 +1,25 @@
+/* custom.css */
+
+:root {
+    --bs-primary: #1F3B4D;    /* Navy Blue */
+    --bs-secondary: #28A745;  /* Light Green */
+    --bs-info: #FFA500;       /* Orange */
+    --bs-light: #F7F7F7;      /* Light Gray */
+    --bs-dark: #333333;       /* Dark Gray */
+  }
+  
+  /* You can also target specific components */
+  body {
+    background-color: var(--bs-light);
+    color: var(--bs-dark);
+  }
+  
+  .navbar {
+    background-color: var(--bs-primary);
+  }
+  
+  .btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+  }
+  

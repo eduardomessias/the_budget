@@ -1,0 +1,92 @@
+{% extends 'layout/simple-page.html' %}
+{% block simplecontent %}
+<div class="card">
+    <div class="card-header">
+        List of entries
+    </div>
+    <div class="card-body no-more-tables">
+        <nav class="navbar justify-content-start gap-1 bg-body-tertiary">
+            <a href="{% url 'budget_details' budget.uuid %}">
+                <button class="btn btn-secondary">Back to budget details</button>
+            </a>
+            <a href="{% url 'register_income' budget.uuid %}">
+                <button class="btn btn-primary">Register income</button>
+            </a>
+            <a href="{% url 'register_expense' budget.uuid %}">
+                <button class="btn btn-primary">Register expense</button>
+            </a>
+            <a href="{% url 'load_recurrencies' budget.uuid %}">
+                <button class="btn btn-primary">Load recurrencies</button>
+            </a>
+        </nav>
+        <table class="table table-hover table-sm table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Source</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Amount</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% if entries %}
+                {% for entry in page_obj %}
+                <tr>
+                    <th scope="row" data-title="Source">
+                        {% if entry.amount > 0 %}
+                        <a href="{% url 'income_details' budget.uuid entry.uuid %}"
+                            class="text-decoration-none text-dark">{{entry.source}}</a>
+                        {% else %}
+                        <a href="{% url 'expense_details' budget.uuid entry.uuid %}"
+                            class="text-decoration-none text-dark">{{entry.source}}</a>
+                        {% endif %}
+                        {% if entry.is_recurrent %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd"
+                                d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
+                            <path
+                                d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
+                        </svg>
+                        {% endif %}
+                        {% if entry.parent is not None %}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-calendar-range" viewBox="0 0 16 16">
+                            <path d="M9 7a1 1 0 0 1 1-1h5v2h-5a1 1 0 0 1-1-1zM1 9h4a1 1 0 0 1 0 2H1V9z" />
+                            <path
+                                d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z" />
+                        </svg>
+                        {% endif %}
+                    </th>
+                    <td data-title="Date">{{entry.date}}</td>
+                    <td data-title="Amount">{{entry.amount}}</td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="4">No entry found</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>        
+    </div>
+    <div class="card-footer">
+        <div class="d-flex justify-content-between">
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+            <nav aria-label="Budget entries pagination">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock simplecontent %}

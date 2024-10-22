@@ -1,0 +1,36 @@
+{% extends 'layout/root.html' %}
+{% load static %}
+{% block base %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{% static 'images/undraw_projections_re_ulc6.svg' %}" class="img-fluid" alt="Personal finance">
+        </div>
+        <div class="col-md-6">
+            <p class="lead">Please authenticate</p>
+            <form method="POST" action="{% url 'home' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="username" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                        aria-describedby="passwordHelp" required>
+                    <div id="passwordHelp" class="form-text">Please never share your password with anyone else.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock base %}

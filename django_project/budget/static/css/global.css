@@ -1,0 +1,7 @@
+.icon-hover-jump {
+    --bs-icon-link-transform: translate3d(0, -.125rem, 0);
+}
+
+.card:hover {
+    box-shadow: none;
+}

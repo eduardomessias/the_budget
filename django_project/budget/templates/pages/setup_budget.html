@@ -1,0 +1,14 @@
+{% extends 'layout/simple-page.html' %}
+{% block simplecontent %}
+<h4>Setup budget</h4>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {% if budget %}
+    <a class="btn btn-secondary" href="{% url 'budget_details' budget.uuid %}">Cancel</A>
+    {% else %}
+    <a class="btn btn-secondary" href="{% url 'home' %}">Cancel</A>
+    {% endif %}
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{% endblock simplecontent %}

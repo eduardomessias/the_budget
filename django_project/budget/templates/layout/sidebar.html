@@ -1,0 +1,34 @@
+{% if user.is_authenticated %}
+<div class="vh-100 bg-light shadow">
+    <nav class="nav text-dark flex-column">
+        <a href="/" class="nav-link active">
+            <span class="icon bi bi-house"></span>
+            <span class="text">Dashboard</span>
+        </a>
+        <a href="/setup_budget" class="nav-link">
+            <span class="icon bi bi-wallet2"></span>
+            <span class="text">Setup a Budget</span>
+        </a>
+        {% if active_budget %}
+        <a data-bs-toggle="collapse" href="#active-budget-menu" class="nav-link">
+            <i class="bi bi-piggy-bank-fill"></i>
+            <span class="text">Active Budget</span>
+        </a>
+        <div class="collapse bg-secondary-subtle" id="active-budget-menu">
+            <a href="{% url 'budget_entries' active_budget.uuid %}" class="nav-link">
+                <i class="bi bi-list-columns"></i>
+                <span class="text">Check Budget Entries</span>
+            </a>
+        </div>
+        {% endif %}
+        <a href="#" class="nav-link">
+            <span class="icon bi bi-graph-up-arrow"></span>
+            <span class="text">Reports</span>
+        </a>
+        <a href="#" class="nav-link">
+            <span class="icon bi bi-gear"></span>
+            <span class="text">Settings</span>
+        </a>
+    </nav>
+</div>
+{% endif %}

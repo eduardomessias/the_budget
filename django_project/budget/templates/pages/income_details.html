@@ -1,0 +1,45 @@
+{% extends 'layout/simple-page.html' %}
+{% block simplecontent %}
+<div class="card">
+    <div class="card-header">
+        {{income.source}}
+    </div>
+    <div class="card-body">
+        <p class="card-title">This budget income entry was registered for {{income.amount}} on {{income.date}}.</p>
+        <p class="card-title">It is part of the budget {{budget.purpose}}.</p>
+        <p class="card-title">Budgeting period from {{budget.from_date}} to {{budget.to_date}}.</p>
+        <p class="card-text">The goal of this budget is to reach {{budget.goal}} by the end of its period.</p>
+        <div class="d-flex flex-wrap gap-1">
+            <a href="{% url 'budget_entries' budget.uuid %}">
+                <button class="btn btn-secondary">Back to budget entry list</button>
+            </a>
+            <a href="{% url 'register_income' budget.uuid income.uuid %}" class="btn btn-primary">Edit this income</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete
+                this income</button>
+        </div>
+    </div>
+    <div class="card-footer text-body-secondary">
+        <p>Created on {{income.created_at}}</p>
+    </div>
+</div>
+<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modal-label">Delete this income?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please make sure you want to delete this budget income entry. This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'delete_income' budget.uuid income.uuid %}">
+                    <button class="btn btn-danger">Confirm
+                        deletion</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock simplecontent %}

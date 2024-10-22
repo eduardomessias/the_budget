@@ -1,0 +1,44 @@
+{% extends 'layout/simple-page.html' %}
+{% block simplecontent %}
+<div class="card">
+    <div class="card-header">
+        {{budget.purpose}}
+    </div>
+    <div class="card-body">
+        <p class="card-title">Budgeting period from {{budget.from_date}} to {{budget.to_date}}.</p>
+        <p class="card-text">The goal of this budget is to reach {{budget.goal}} by the end of its period.</p>
+        <p class="card-text">The current balance is {{budget.overall_balance}}.</p>
+        <div class="d-flex flex-wrap gap-1">
+            <a href="{% url 'home' %}" class="btn btn-secondary">Back to the budget list</a>
+            <a href="{% url 'budget_entries' budget.uuid %}" class="btn btn-primary">Check budget entries</a>
+            <a href="{% url 'setup_budget' budget.uuid %}" class="btn btn-primary">Edit this budget</a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete
+                this budget</button>
+        </div>
+    </div>
+    <div class="card-footer text-body-secondary">
+        <p>Created on {{budget.created_at}}</p>
+    </div>
+</div>
+<div class="modal fade" id="delete-modal" tabindex="-1" aria-labelledby="modal-label" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modal-label">Delete this budget?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please make sure you want to delete this budget. This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'delete_budget' budget.uuid %}">
+                    <button class="btn btn-danger">Confirm
+                        deletion</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+        
+{% endblock simplecontent %}

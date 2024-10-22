@@ -1,0 +1,94 @@
+{% extends 'layout/simple-page.html' %}
+{% load static %}
+{% block simplecontent %}
+{% if user.is_authenticated %}
+<div class="container mt-2">
+    <div class="row">
+        <div class="col-12">
+            {% if active_budget %}
+            <h1>Active Budget: {{active_budget.purpose}}</h1>
+            {% else %}
+            <h1>Dashboard</h1>
+            {% endif %}
+            <p>
+                This page gives you an overview of the budgets you have created
+                and the estatistics of the the active budget you are currently living in!
+            </p>
+        </div>
+    </div>
+    <div class="row">
+        {% if active_budget %}
+        <div class="col-5">
+            {% include 'active_budget.html' %}
+        </div>
+        <div class="col-7">
+            <div class="row">
+                <div class="col-4">
+                    <div class="card shadow">
+                        <div class="card-header">Current Goal</div>
+                        <div class="card-body text-center">
+                            <p>{{active_budget.goal}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card shadow">
+                        <div class="card-header">Overall Balance</div>
+                        <div class="card-body text-center">
+                            <p>{{active_budget.overall_balance}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row  mt-3">
+                <div class="col-4">
+                    <div class="card shadow">
+                        <div class="card-header">Deadline (in days)</div>
+                        <div class="card-body text-center">
+                            <p>{{active_budget.remaining_days}}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card shadow">
+                        <div class="card-header">Distance from Target</div>
+                        <div class="card-body text-center">
+                            <p>{{active_budget.distance_from_target}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-12">
+            {% include 'budget_list.html' %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="row">
+    <div class="col-md-6">
+        <img src="{% static 'images/undraw_projections_re_ulc6.svg' %}" class="img-fluid" alt="Personal finance">
+    </div>
+    <div class="col-md-6">
+        <p class="lead">Please authenticate</p>
+        <form method="POST" action="{% url 'home' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="username" class="form-control" id="username" name="username" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password"
+                    aria-describedby="passwordHelp" required>
+                <div id="passwordHelp" class="form-text">Please never share your password with anyone else.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock simplecontent %}
