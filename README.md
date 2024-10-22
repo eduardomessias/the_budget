@@ -57,5 +57,5 @@ sudo docker-compose exec web python manage.py makemigrations <project_name>
 ```
 Remember to apply this migration in the database after running command. To do so run the _migrate_ command mentioned above.
 
-source ./the_budget_venv/bin/activate
+
 source the_budget_venv/bin/activate

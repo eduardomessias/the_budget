@@ -9,11 +9,17 @@
 </div>
 {% endfor %}
 {% endif %}
-<h4>Edit budget entry</h4>
+
+<h4>
+    {% if category.id %} Edit Category - {{ category.name }} {% else %} Add Category {% endif %}
+</h4>
+
 <form method="POST">
     {% csrf_token %}
-    {{ form.as_p }}   
-    <a class="btn btn-secondary" href="{% url 'home' %}">Cancel</A>  
-    <button type="submit" class="btn btn-primary">Submit</button>
+    {{ form.as_p }}
+    <a class="btn btn-secondary" href="{% url 'categories' %}">Cancel</a>
+    <button type="submit" class="btn btn-primary">
+        {% if category.id %} Update Category {% else %} Add Category {% endif %}
+    </button>
 </form>
 {% endblock content %}

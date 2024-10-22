@@ -32,6 +32,7 @@
             <thead>
                 <tr>
                     <th scope="col">Source</th>
+                    <th scope="col">Category</th>
                     <th scope="col">Date</th>
                     <th scope="col">Amount</th>
                 </tr>
@@ -66,6 +67,7 @@
                         </svg>
                         {% endif %}
                     </th>
+                    <td data-title="Category">{{entry.category}}</td>
                     <td data-title="Date">{{entry.date}}</td>
                     <td data-title="Amount">{{entry.amount}}</td>
                 </tr>

@@ -78,6 +78,15 @@ class RecurrencyType(models.TextChoices):
     MONTHLY = 3
     YEARLY = 4
 
+class Category(CommonDataModel, SoftDeletableModel):    
+    category = models.CharField(max_length=30)        
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
+
+    def __str__(self):
+        return self.category
+    
+    class Meta:
+        verbose_name_plural = 'Categories'
 
 class Income(CommonDataModel, SoftDeletableModel):
     source = models.CharField(max_length=255)
@@ -90,6 +99,7 @@ class Income(CommonDataModel, SoftDeletableModel):
     budget = models.ForeignKey(Budget, on_delete=models.CASCADE)
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.source
@@ -133,6 +143,7 @@ class Income(CommonDataModel, SoftDeletableModel):
         child.frequency = 1
         child.recurrency = RecurrencyType.ONE_OFF
         child.date = date
+        child.category = self.category
         if child.date <= self.budget.to_date:
             child.save()
         elif child.date > self.budget.to_date:
@@ -166,6 +177,7 @@ class Expense(CommonDataModel, SoftDeletableModel):
     budget = models.ForeignKey(Budget, on_delete=models.CASCADE)
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.source
@@ -210,6 +222,7 @@ class Expense(CommonDataModel, SoftDeletableModel):
         child.frequency = 1
         child.recurrency = RecurrencyType.ONE_OFF
         child.date = date
+        child.category = self.category
         if child.date <= self.budget.to_date:
             child.save()
         elif child.date > self.budget.to_date:
@@ -233,9 +246,3 @@ class Expense(CommonDataModel, SoftDeletableModel):
 
     class Meta:
         verbose_name_plural = 'Expenses'
-
-class Category(CommonDataModel, SoftDeletableModel):    
-    name = models.CharField(max_length=30, default=None)
-
-    class Meta:
-        verbose_name_plural = 'Categories'

@@ -61,18 +61,39 @@ class BudgetForm(forms.ModelForm):
         self.fields['goal'].widget.attrs['placeholder'] = 'Goal'
         self.fields['goal'].label = ''
         self.fields['goal'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid goal.</small></span>'
-        self.fields['from_date'] = forms.DateField(widget=forms.SelectDateWidget(
-            attrs={'class': 'form-control'}))
-        self.fields['from_date'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid from date.</small></span>'
-        self.fields['to_date'] = forms.DateField(widget=forms.SelectDateWidget(
-            attrs={'class': 'form-control'}))
-        self.fields['to_date'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid to date. It should be greater than the budget start date.</small></span>'
+              
+         # From Date Field with HTML5 Date Picker
+        self.fields['from_date'] = forms.DateField(
+            widget=forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',  # HTML5 date input
+                    'placeholder': 'Select From Date',
+                    'autocomplete': 'off',
+                }
+            ),
+            help_text='<span class="form-text text-muted"><small>Required. Inform a valid from date.</small></span>',
+            label='From Date'
+        )
 
+        # To Date Field with HTML5 Date Picker
+        self.fields['to_date'] = forms.DateField(
+            widget=forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',  # HTML5 date input
+                    'placeholder': 'Select To Date',
+                    'autocomplete': 'off',
+                }
+            ),
+            help_text='<span class="form-text text-muted"><small>Required. Inform a valid to date.</small></span>',
+            label='To Date'
+        )
 
 class BudgetEntryForm(forms.ModelForm):
     class Meta:
         model = None
-        fields = ('source', 'amount', 'date',
+        fields = ('source', 'category', 'amount', 'date',
                   'recurrency', 'frequency')
 
     def __init__(self, *args, **kwargs):
@@ -87,10 +108,19 @@ class BudgetEntryForm(forms.ModelForm):
         self.fields['amount'].label = ''
         self.fields['amount'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid amount.</small></span>'
 
-        self.fields['date'] = forms.DateField(widget=forms.SelectDateWidget(
-            attrs={'class': 'form-control'}))
-        self.fields['date'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid date.</small></span>'
-        self.fields['date'].label = 'Date'
+        # To Date Field with HTML5 Date Picker
+        self.fields['date'] = forms.DateField(
+            widget=forms.DateInput(
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date',  # HTML5 date input
+                    'placeholder': 'Select To Date',
+                    'autocomplete': 'off',
+                }
+            ),
+            help_text='<span class="form-text text-muted"><small>Required. Inform a valid to date.</small></span>',
+            label='Date'
+        )
 
         self.fields['recurrency'] = forms.ChoiceField(choices=RecurrencyType.choices, widget=forms.Select(
             attrs={'class': 'form-control'}))
@@ -102,12 +132,17 @@ class BudgetEntryForm(forms.ModelForm):
         self.fields['frequency'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid frequency.</small></span>'
         self.fields['frequency'].label = 'Frequency'
 
+        self.fields['category'] = forms.ModelChoiceField(
+            queryset=Category.objects.all(),
+            widget=forms.Select(attrs={'class': 'form-control'}),
+            help_text='<span class="form-text text-muted"><small>Required. Inform a valid category.</small></span>',
+            label='Category')
 
 class IncomeForm(BudgetEntryForm):
 
     class Meta:
         model = Income
-        fields = ('source', 'amount', 'date',
+        fields = ('source', 'category', 'amount', 'date',
                   'recurrency', 'frequency')
 
 
@@ -115,18 +150,23 @@ class ExpenseForm(BudgetEntryForm):
 
     class Meta:
         model = Expense
-        fields = ('source', 'amount', 'date',
+        fields = ('source', 'category', 'amount', 'date',
                   'recurrency', 'frequency')
 
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ('name',)
+        fields = ('category', 'amount')
 
     def __init__(self, *args, **kwargs):
         super(CategoryForm, self).__init__(*args, **kwargs)
-        self.fields['name'].widget.attrs['class'] = 'form-control'
-        self.fields['name'].widget.attrs['placeholder'] = 'Name'
-        self.fields['name'].label = 'Category name'
-        self.fields['name'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid source.</small></span>'        
+        self.fields['category'].widget.attrs['class'] = 'form-control'
+        self.fields['category'].widget.attrs['placeholder'] = 'Category'
+        self.fields['category'].label = 'Category'
+        self.fields['category'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid source.</small></span>'
+
+        self.fields['amount'].widget.attrs['class'] = 'form-control'
+        self.fields['amount'].widget.attrs['placeholder'] = 'Amount'
+        self.fields['amount'].label = 'Budget'
+        self.fields['amount'].help_text = '<span class="form-text text-muted"><small>Required. Inform a valid amount.</small></span>'        
 

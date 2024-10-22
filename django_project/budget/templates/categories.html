@@ -18,20 +18,43 @@
         <nav class="navbar justify-content-start gap-1 bg-body-tertiary">
             <a href="{% url 'add_category' %}">
                 <button class="btn btn-primary">Add</button>
-            </a>
+            </a>            
         </nav>
         <table class="table table-hover table-sm">
             <thead>
                 <tr>                   
-                    <th scope="col">Category</th>                    
+                    <th scope="col">Category</th> 
+                    <th scope="col">Budget</th>                   
                 </tr>
             </thead>
             <tbody class="table-group-divider">
                 {% if categories %}
                 {% for category in categories %}
-                <tr>                    
-                    <td data-title="Name">{{category.name}}</td>                    
+                <tr>
+                    <!-- Category name with a link to edit -->
+                    <th scope="row" data-title="Category Name">
+                        <a href="{% url 'edit_category' category.id %}" class="text-decoration-none text-dark">{{ category.category }}</a>
+                    </th>
+                    
+                    <th scope="row" data-title="Budget">
+                        <a href="{% url 'edit_category' category.id %}" class="text-decoration-none text-dark">{{ category.amount }}</a>
+                    </th>
+
+                    <!-- Action icons for edit and delete -->
+                    <td data-title="Actions">
+                        <!-- Edit icon -->
+                        <a href="{% url 'edit_category' category.id %}" class="text-decoration-none ms-2" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        
+                        <!-- Delete icon with confirmation -->
+                        <a href="{% url 'remove_category' category.uuid %}" class="text-decoration-none ms-2 text-danger" title="Delete"
+                           onclick="return confirm('Are you sure you want to delete this category?');">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
                 </tr>
+                          
                 {% endfor %}
                 {% else %}
                 <tr>

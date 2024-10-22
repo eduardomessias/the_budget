@@ -35,4 +35,6 @@ urlpatterns = [
      path("user_settings/", view=views.user_settings, name="user_settings"),
      path("categories/", view=views.categories, name="categories"),
      path("add_category/", view=views.add_category, name="add_category"),
+     path("remove_category/<uuid:uuid>/", view=views.remove_category, name="remove_category"),
+     path("edit_category/<int:category_id>/", view=views.edit_category, name="edit_category"),
 ]

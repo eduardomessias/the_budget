@@ -268,7 +268,7 @@ def user_settings(request):
 
 def categories(request):
     if request.user.is_authenticated: 
-        categories = Category.objects.all()                   
+        categories = Category.objects.all()           
         return render(request, 'categories.html', {'categories': categories})
     else:
         messages.error(
@@ -285,7 +285,7 @@ def add_category(request):
                 if not category:
                     category = form.save(commit=False)                
                 category = form.save()                
-                messages.success(request, f'Category added {category.name}!')
+                messages.success(request, f'Category added {category.category}!')
                 return redirect('categories')
             return render(request, 'edit_category.html', {'form': form})
         except ValueError as e:
@@ -297,3 +297,42 @@ def add_category(request):
             request, f'You must be logged in to add a category.', extra_tags='danger')
         return redirect(request, 'home')
     
+def edit_category(request, category_id):
+    if request.user.is_authenticated:
+        try:
+            category = Category.objects.get(id=category_id, user=request.user)
+            #category.user = request.user
+        except Category.DoesNotExist:
+            messages.error(request, 'Category not found or access denied.', extra_tags='danger')
+            return redirect('categories')
+
+        form = CategoryForm(request.POST or None, instance=category)
+        
+        if request.method == 'POST':
+            try:
+                if form.is_valid():
+                    category = form.save()
+                    messages.success(request, f'Category updated to {category.category}!')
+                    return redirect('categories')
+            except ValueError as e:
+                messages.error(request, f'Error updating category: {e}', extra_tags='danger')
+
+        return render(request, 'edit_category.html', {'form': form, 'category': category})
+    else:
+        messages.error(request, 'You must be logged in to edit a category.', extra_tags='danger')
+        return redirect('home')
+
+def remove_category(request, uuid):
+    if request.user.is_authenticated:
+        try:
+            category = Category.objects.get(uuid=uuid, user=request.user)
+            category_name = category.name  # Store the category name for the message
+            category.delete()
+            messages.success(request, f'Category "{category_name}" has been successfully removed!')
+            return redirect('categories')
+        except Category.DoesNotExist:
+            messages.error(request, 'Category not found or access denied.', extra_tags='danger')
+            return redirect('categories')
+    else:
+        messages.error(request, 'You must be logged in to remove a category.', extra_tags='danger')
+        return redirect('home')
