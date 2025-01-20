@@ -1,6 +1,6 @@
 {% if user.is_authenticated %}
-<div class="vh-100 bg-light shadow">
-    <nav class="nav text-dark flex-column">
+<div class="h-100 bg-body-secondary">
+    <nav class="nav flex-column">
         <a href="/" class="nav-link active">
             <span class="icon bi bi-house"></span>
             <span class="text">Dashboard</span>
@@ -25,10 +25,16 @@
             <span class="icon bi bi-graph-up-arrow"></span>
             <span class="text">Reports</span>
         </a>
-        <a href="#" class="nav-link">
+        <a data-bs-toggle="collapse" href="#user-settings-menu"class="nav-link">
             <span class="icon bi bi-gear"></span>
-            <span class="text">Settings</span>
+            <span class="text">User Settings</span>
         </a>
+        <div class="collapse bg-secondary-subtle" id="user-settings-menu">
+            <a href="{% url 'categories' %}" class="nav-link">
+                <i class="bi bi-list-columns"></i>
+                <span class="text">Categories</span>
+            </a>
+        </div>
     </nav>
 </div>
 {% endif %}

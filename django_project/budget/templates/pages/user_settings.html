@@ -1,14 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'layout/simple-page.html' %}
 {% load static %}
-{% block content %}
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endfor %}
-{% endif %}
+{% block simpleontent %}
 <div class="card">
     <div class="card-header">
         Settings
@@ -25,5 +17,4 @@
         </table>
     </div>
 </div>
-
-{% endblock content %}
+{% endblock simplecontent %}

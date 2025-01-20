@@ -53,7 +53,7 @@ class Budget(CommonDataModel, SoftDeletableModel):
             models.Sum('amount'))['amount__sum'] or 0
         total_expense = Expense.objects.filter(budget=self, is_deleted=False).aggregate(
             models.Sum('amount'))['amount__sum'] or 0
-        return total_income + total_expense
+        return total_income + total_expense        
 
     def reload_recurrencies(self):
         incomes = Income.objects.filter(is_recurrent=True, is_deleted=False)
@@ -66,6 +66,14 @@ class Budget(CommonDataModel, SoftDeletableModel):
             expense_last_recurrency_date = expense.last_recurrency_date()
             if expense_last_recurrency_date >= self.from_date:
                 expense.create_recurrencies()
+
+    def remaining_days(self):
+        delta = self.to_date - datetime.date.today()
+        return delta.days
+    
+    def distance_from_target(self):
+        difference = self.overall_balance() - self.goal
+        return difference
 
     class Meta:
         verbose_name_plural = 'Budgets'
@@ -88,6 +96,7 @@ class Category(CommonDataModel, SoftDeletableModel):
     class Meta:
         verbose_name_plural = 'Categories'
 
+
 class Income(CommonDataModel, SoftDeletableModel):
     source = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
@@ -99,7 +108,7 @@ class Income(CommonDataModel, SoftDeletableModel):
     budget = models.ForeignKey(Budget, on_delete=models.CASCADE)
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE) 
 
     def __str__(self):
         return self.source

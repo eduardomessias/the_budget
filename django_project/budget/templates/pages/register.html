@@ -1,43 +1,37 @@
-{% extends 'layout/base.html' %}
+{% extends 'layout/simple-page.html' %}
 {% load static %}
-{% block content %}
-{% if messages %}
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-    {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-{% endfor %}
-{% endif %}
+{% block simplecontent %}
 {% if user.is_authenticated %}
 <h1>Welcome, {{ user.first_name }}!</h1>
 {% else %}
-<div class="row">
-    <div class="col-md-6">
-        <img src="{% static 'images/undraw_projections_re_ulc6.svg' %}" class="img-fluid" alt="Personal finance">
-    </div>
-    <div class="col-md-6">
-        <p class="lead">User registration</p>
-        <form method="POST" action="">
-            {% csrf_token %}
-            {% if form.errors %}
-            {% for field in form %}
-            {% for error in field.errors %}
-            <div class="alert alert-danger" role="alert">
-                <strong>{{ error|escape }}</strong>
-            </div>
-            {% endfor %}
-            {% endfor %}
-            {% for error in form.non_field_errors %}
-            <div class="alert alert-danger" role="alert">
-                <strong>{{ error|escape }}</strong>
-            </div>
-            {% endfor %}
-            {% endif %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{% static 'images/undraw_projections_re_ulc6.svg' %}" class="img-fluid" alt="Personal finance">
+        </div>
+        <div class="col-md-6">
+            <p class="lead">User registration</p>
+            <form method="POST" action="">
+                {% csrf_token %}
+                {% if form.errors %}
+                {% for field in form %}
+                {% for error in field.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+                {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <div class="alert alert-danger" role="alert">
+                    <strong>{{ error|escape }}</strong>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
     </div>
 </div>
 {% endif %}
-{% endblock content %}
+{% endblock simplecontent %}

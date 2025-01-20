@@ -4,9 +4,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from dateutil import relativedelta
+from django.core.paginator import Paginator
 
 from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm, CategoryForm
 from .models import Budget, Income, Expense, RecurrencyType, Category
+#from budget.services import budget_service
 
 
 def home(request):
@@ -23,11 +25,11 @@ def home(request):
                 request, f'Error logging in as {username}. Please try again.', extra_tags='danger')
             return redirect('home')
     else:
-        budgets = Budget.objects.filter(
-            is_deleted=False).order_by("-created_at")
+        budgets = Budget.objects.filter(is_deleted=False).order_by("-created_at")
+        #budgets = budget_service.get_user_budget_list_ordered_by_created_at(request.user)
         active_budget = Budget.objects.filter(
             is_deleted=False, from_date__lte=timezone.now(), to_date__gte=timezone.now()).first()
-        return render(request, 'home.html', {'budgets': budgets, 'active_budget': active_budget})
+        return render(request, 'pages/home.html', {'budgets': budgets, 'active_budget': active_budget})
 
 
 def logout_user(request):
@@ -50,8 +52,8 @@ def register_user(request):
             return redirect('home')
     else:
         form = SignUpForm()
-        return render(request, 'register.html', {'form': form})
-    return render(request, 'register.html', {'form': form})
+        return render(request, 'pages/register.html', {'form': form})
+    return render(request, 'pages/register.html', {'form': form})
 
 
 def setup_budget(request, uuid=None):
@@ -68,11 +70,11 @@ def setup_budget(request, uuid=None):
                 messages.success(
                     request, f'Budget saved for {budget.purpose}!')
                 return redirect('home')
-            return render(request, 'setup_budget.html', {'form': form, 'budget': budget})
+            return render(request, 'pages/setup_budget.html', {'form': form, 'budget': budget})
         except ValueError as e:
             messages.error(
                 request, f'Error saving budget: {e}', extra_tags='danger')
-            return render(request, 'setup_budget.html', {'form': form, 'budget': budget})
+            return render(request, 'pages/setup_budget.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to set up a budget.', extra_tags='danger')
@@ -94,7 +96,7 @@ def delete_budget(request, uuid):
 def budget_details(request, uuid):
     if request.user.is_authenticated:
         budget = Budget.objects.get(uuid=uuid)
-        return render(request, 'budget_details.html', {'budget': budget})
+        return render(request, 'pages/budget_details.html', {'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to view a budget.', extra_tags='danger')
@@ -107,7 +109,14 @@ def budget_entries(request, uuid):
         incomes = Income.objects.filter(budget=budget, is_deleted=False)
         expenses = Expense.objects.filter(budget=budget, is_deleted=False)
         entries = incomes.union(expenses).order_by("-date")
-        return render(request, 'budget_entries_list.html', {'budget': budget, 'entries': entries})
+        paginator = Paginator(entries, 10)
+        # Get the number of the page or 1
+        if request.GET.get("page") != None:
+            page_number = request.GET.get("page")
+        else:
+            page_number = 1
+        page_obj = paginator.get_page(page_number)
+        return render(request, 'pages/budget_entries_list.html', {'budget': budget, 'entries': entries, 'page_obj': page_obj})
     else:
         messages.error(
             request, f'You must be logged in to view a budget.', extra_tags='danger')
@@ -131,11 +140,11 @@ def register_income(request, uuid, income_uuid=None):
                 income.create_recurrencies()
                 messages.success(request, f'Income saved for {income.source}!')
                 return redirect('budget_entries', uuid=uuid)
-            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+            return render(request, 'pages/edit_budget_entry.html', {'form': form, 'budget': budget})
         except ValueError as e:
             messages.error(
                 request, f'Error saving income: {e}', extra_tags='danger')
-            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+            return render(request, 'pages/edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an income.', extra_tags='danger')
@@ -162,11 +171,11 @@ def register_expense(request, uuid, expense_uuid=None):
                 messages.success(
                     request, f'Expense saved for {expense.source}!')
                 return redirect('budget_entries', uuid=uuid)
-            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+            return render(request, 'pages/edit_budget_entry.html', {'form': form, 'budget': budget})
         except ValueError as e:
             messages.error(
                 request, f'Error saving expense: {e}', extra_tags='danger')
-            return render(request, 'edit_budget_entry.html', {'form': form, 'budget': budget})
+            return render(request, 'pages/edit_budget_entry.html', {'form': form, 'budget': budget})
     else:
         messages.error(
             request, f'You must be logged in to register an expense.', extra_tags='danger')
@@ -202,7 +211,7 @@ def income_details(request, uuid, entry_uuid):
         budget = Budget.objects.get(uuid=uuid)
         income = Income.objects.get(uuid=entry_uuid)
         income.recurrency = RecurrencyType(income.recurrency).label
-        return render(request, 'income_details.html', {'budget': budget, 'income': income})
+        return render(request, 'pages/income_details.html', {'budget': budget, 'income': income})
     else:
         messages.error(
             request, f'You must be logged in to view an income.', extra_tags='danger')
@@ -214,7 +223,7 @@ def expense_details(request, uuid, entry_uuid):
         budget = Budget.objects.get(uuid=uuid)
         expense = Expense.objects.get(uuid=entry_uuid)
         expense.recurrency = RecurrencyType(expense.recurrency).label
-        return render(request, 'expense_details.html', {'budget': budget, 'expense': expense})
+        return render(request, 'pages/expense_details.html', {'budget': budget, 'expense': expense})
     else:
         messages.error(
             request, f'You must be logged in to view an expense.', extra_tags='danger')
@@ -256,11 +265,11 @@ def load_expense_recurrencies(request, budget):
 
 
 def credits(request):
-    return render(request, 'credits.html')
+    return render(request, 'pages/credits.html')
 
 def user_settings(request):
     if request.user.is_authenticated:                        
-        return render(request, 'user_settings.html')
+        return render(request, 'pages/user_settings.html')
     else:
         messages.error(
             request, f'You must be logged in to view the settings.', extra_tags='danger')
@@ -269,7 +278,7 @@ def user_settings(request):
 def categories(request):
     if request.user.is_authenticated: 
         categories = Category.objects.all()           
-        return render(request, 'categories.html', {'categories': categories})
+        return render(request, 'pages/categories.html', {'categories': categories})
     else:
         messages.error(
             request, f'You must be logged in to edit categories.', extra_tags='danger')
@@ -287,11 +296,11 @@ def add_category(request):
                 category = form.save()                
                 messages.success(request, f'Category added {category.category}!')
                 return redirect('categories')
-            return render(request, 'edit_category.html', {'form': form})
+            return render(request, 'pages/edit_category.html', {'form': form})
         except ValueError as e:
             messages.error(
                 request, f'Error saving category: {e}', extra_tags='danger')
-            return render(request, 'edit_category.html', {'form': form})
+            return render(request, 'pages/edit_category.html', {'form': form})
     else:
         messages.error(
             request, f'You must be logged in to add a category.', extra_tags='danger')
@@ -317,7 +326,7 @@ def edit_category(request, category_id):
             except ValueError as e:
                 messages.error(request, f'Error updating category: {e}', extra_tags='danger')
 
-        return render(request, 'edit_category.html', {'form': form, 'category': category})
+        return render(request, 'pages/edit_category.html', {'form': form, 'category': category})
     else:
         messages.error(request, 'You must be logged in to edit a category.', extra_tags='danger')
         return redirect('home')

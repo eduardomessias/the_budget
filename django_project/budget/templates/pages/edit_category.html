@@ -1,22 +1,21 @@
 {% extends 'layout/simple-page.html' %}
+{% load static %}
 {% block simplecontent %}
 <div class="container">
     <div class="row">
         <div class="col-6 offset-3">
             <div class="card">
                 <div class="card-header">
-                    Edit Budget Entry
+                    {% if category.id %} Edit Category - {{ category.name }} {% else %} Add Category {% endif %}
                 </div>
                 <div class="card-body">
                     <form method="POST">
                         {% csrf_token %}
                         {{ form.as_p }}
-                        {% if budget %}
-                        <a class="btn btn-secondary" href="{% url 'budget_entries' budget.uuid %}">Cancel</A>
-                        {% else %}
-                        <a class="btn btn-secondary" href="{% url 'home' %}">Cancel</A>
-                        {% endif %}
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <a class="btn btn-secondary" href="{% url 'categories' %}">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            {% if category.id %} Update Category {% else %} Add Category {% endif %}
+                        </button>
                     </form>
                 </div>
             </div>
