@@ -5,6 +5,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from dateutil import relativedelta
 from django.core.paginator import Paginator
+import csv
+from django.http import HttpResponse
+from io import StringIO
 
 from .forms import BudgetForm, ExpenseForm, IncomeForm, SignUpForm, CategoryForm
 from .models import Budget, Income, Expense, RecurrencyType, Category
@@ -345,3 +348,42 @@ def remove_category(request, uuid):
     else:
         messages.error(request, 'You must be logged in to remove a category.', extra_tags='danger')
         return redirect('home')
+    
+
+def export_budget_to_file(request, uuid):
+    if request.user.is_authenticated:
+        budget = Budget.objects.get(uuid=uuid)
+        
+        incomes = Income.objects.filter(budget=budget, is_deleted=False)
+        expenses = Expense.objects.filter(budget=budget, is_deleted=False)
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = F'attachment; filename="{budget.purpose}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Budget', budget.purpose])
+        writer.writerow(['Goal', budget.goal])
+        writer.writerow(['From Date', budget.from_date])
+        writer.writerow(['To Date', budget.to_date])
+        writer.writerow(['Overall Balance', budget.overall_balance()])
+        writer.writerow(['Remaining Days', budget.remaining_days()])
+        writer.writerow(['Distance from Target', budget.distance_from_target()])
+        writer.writerow([''])
+        writer.writerow(['Incomes'])
+        writer.writerow(['Source', 'Amount', 'Date', 'Category'])
+        for income in incomes:
+            writer.writerow([income.source, income.amount, income.date, income.category])
+        writer.writerow([''])
+        writer.writerow(['Expenses'])
+        writer.writerow(['Source', 'Amount', 'Date', 'Category'])
+        for expense in expenses:
+            writer.writerow([expense.source, expense.amount, expense.date, expense.category])
+
+        return response
+
+        # messages.success(request, f'Budget exported to file!')
+        # return redirect('budget_entries', uuid=uuid)
+    else:
+        messages.error(
+            request, f'You must be logged in to export a budget.', extra_tags='danger')
+        return redirect(request, 'home')

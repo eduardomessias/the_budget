@@ -74,6 +74,38 @@ class Budget(CommonDataModel, SoftDeletableModel):
     def distance_from_target(self):
         difference = self.overall_balance() - self.goal
         return difference
+    
+    def export_to_csv(self):
+        import csv
+        from django.http import HttpResponse
+        from io import StringIO
+
+        incomes = Income.objects.filter(budget=self, is_deleted=False)
+        expenses = Expense.objects.filter(budget=self, is_deleted=False)
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = F'attachment; filename="{self.purpose}.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Budget', self.purpose])
+        writer.writerow(['Goal', self.goal])
+        writer.writerow(['From Date', self.from_date])
+        writer.writerow(['To Date', self.to_date])
+        writer.writerow(['Overall Balance', self.overall_balance()])
+        writer.writerow(['Remaining Days', self.remaining_days()])
+        writer.writerow(['Distance from Target', self.distance_from_target()])
+        writer.writerow([''])
+        writer.writerow(['Incomes'])
+        writer.writerow(['Source', 'Amount', 'Date', 'Category'])
+        for income in incomes:
+            writer.writerow([income.source, income.amount, income.date, income.category])
+        writer.writerow([''])
+        writer.writerow(['Expenses'])
+        writer.writerow(['Source', 'Amount', 'Date', 'Category'])
+        for expense in expenses:
+            writer.writerow([expense.source, expense.amount, expense.date, expense.category])
+
+        return response
 
     class Meta:
         verbose_name_plural = 'Budgets'
