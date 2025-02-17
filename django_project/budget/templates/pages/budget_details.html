@@ -12,6 +12,7 @@
             <a href="{% url 'home' %}" class="btn btn-secondary">Back to the budget list</a>
             <a href="{% url 'budget_entries' budget.uuid %}" class="btn btn-primary">Check budget entries</a>
             <a href="{% url 'setup_budget' budget.uuid %}" class="btn btn-primary">Edit this budget</a>
+            <a href="{% url 'export_budget_to_file' budget.uuid %}" class="btn btn-success">Export budget</a>
             <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-modal">Delete
                 this budget</button>
         </div>
